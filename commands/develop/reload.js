@@ -4,6 +4,7 @@ module.exports = {
     name: 'reload',
     description: 'Reloads a command',
     permissions: 'ADMINISTRATOR',
+    show: false,
     args: true,
     execute(message, args) {
         const commandName = args[0].toLowerCase();
