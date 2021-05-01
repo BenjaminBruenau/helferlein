@@ -20,12 +20,12 @@ module.exports = {
         //command specified
         embeddedCommandHelp();
 
-
         function embeddedHelp() {
+            const argument = '<command name>';
             const embeddedHelp = new Discord.MessageEmbed()
                 .setColor('#F1C40F')
                 .setTitle('**Help from Helferlein**')
-                .setDescription(`You can see all of my commands here. \nTo see information of a specific command please use: \n \`${prefix}help [command name]\``)
+                .setDescription(`You can see all of my commands here. \nTo see information of a specific command please use: \n \`${prefix}help ${argument}\``)
                 .setThumbnail(iconUrl)
                 .addFields(
                     { name: 'Commands', value: getCommands() },

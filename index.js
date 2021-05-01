@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Discord = require('discord.js');
+const { embeddedInvalidMessage } = require("./commands/util/embedded-messages");
 const { prefix, token} = require('./config.json');
 
 const client = new Discord.Client();
@@ -25,6 +26,7 @@ client.once('ready', () => {
 client.login(token).then(value => console.log('Successfully Logged in!'));
 
 client.on('message', message => {
+    //ToDo: This is pretty messy
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
@@ -44,23 +46,23 @@ client.on('message', message => {
     //Check for sufficient permissions
     if (command.permissions) {
         if (message.channel.type === 'dm') {
-            return message.reply('I can\'t execute this command inside DMs!');
+            return message.reply(embeddedInvalidMessage('I can\'t execute this command inside DMs!'));
         }
         const authorPerms = message.channel.permissionsFor(message.author);
         if (!authorPerms || !authorPerms.has(command.permissions)) {
-            return message.reply('Insufficient Permissions!');
+            return message.reply(embeddedInvalidMessage('Insufficient Permissions!'));
         }
         console.log(`Sufficient Permissions to execute ${prefix}${commandName}`);
     }
 
     //Check for correct Usage
     if (command.args && !args.length) {
-        let reply = `You did not provide any arguments, ${message.author}!`;
+        let reply = `You did not provide any arguments, ${message.author.username}!`;
 
         if (command.usage) {
             reply += `\nThe correct usage is: \`${prefix}${commandName} ${command.usage}\``;
         }
-        return message.channel.send(reply);
+        return message.channel.send(embeddedInvalidMessage(reply, '#e37b00'));
     }
 
     //Check for cooldown
@@ -77,7 +79,7 @@ client.on('message', message => {
 
         if (now < expirationTime) {
             const timeLeft = (expirationTime - now) / 1000;
-            return message.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing this command`);
+            return message.reply(embeddedInvalidMessage(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing this command`, '#e37b00'));
         }
     }
     timestamps.set(message.author.id, now);
@@ -88,7 +90,7 @@ client.on('message', message => {
         command.execute(message, args);
     } catch (error) {
         console.error(error);
-        message.reply('There was an error trying to execute this command!');
+        message.reply(embeddedInvalidMessage('There was an error trying to execute this command!'));
     }
 });
 
