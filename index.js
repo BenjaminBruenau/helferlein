@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 const { embeddedInvalidMessage } = require("./util/embedded-messages");
-const { prefix, token } = require('./config.json');
+const { prefix, token, confirm_test, reject_test, channelID } = require('./config.json');
 
 const client = new Discord.Client();
 
@@ -93,4 +93,49 @@ client.on('message', message => {
         message.reply(embeddedInvalidMessage('There was an error trying to execute this command!'));
     }
 });
+
+
+client.on('messageReactionAdd', (reaction, user) => {
+    const isCorrectEmoji = reaction.emoji.name === confirm_test || reaction.emoji.name === reject_test;
+    const isCorrectChannel = reaction.message.channel.id === channelID;
+    console.log(reaction.message.channel.id);
+
+    if (!isCorrectChannel || !isCorrectEmoji) {
+        return;
+    }
+    console.log('Success');
+})
+
+client.on('raw', packet => {
+    if (!['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'].includes(packet.t)) return;
+
+    const channel = client.channels.cache.get(channelID);
+
+    //Message is cached
+    if (channel.messages.cache.has(packet.d.message_id)) return;
+
+    //Fetch Message since its not cached
+    channel.messages.fetch(packet.d.message_id).then(message => {
+        // Emojis can have identifiers of name:id format
+        const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+        const reaction = message.reactions.cache.get(emoji);
+
+        // Check which type of event it is before emitting
+        if (packet.t === 'MESSAGE_REACTION_ADD') {
+            client.users.fetch(packet.d.user_id)
+                .then(user => {
+                    client.emit('messageReactionAdd', reaction, user);
+                })
+                .catch(() => console.error('Failed to retrieve User'));
+        }
+        if (packet.t === 'MESSAGE_REACTION_REMOVE') {
+            client.users.fetch(packet.d.user_id)
+                .then(user => {
+                    client.emit('messageReactionRemove', reaction, user);
+                })
+                .catch(() => console.error('Failed to retrieve User'));
+        }
+    });
+})
+
 
