@@ -13,6 +13,11 @@ exports.embeddedInvalidMessage = function (error, color= '#ff0000') {
         .setTitle(error);
 }
 
+/**
+ *
+ * @param success A string with an success message
+ * @returns An embedded Success Message
+ */
 exports.embeddedSuccessMessage = function (success) {
     return new Discord.MessageEmbed()
         .setColor('#53ae12')

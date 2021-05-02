@@ -1,6 +1,7 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { embeddedInvalidMessage } = require("./util/embedded-messages");
+const {sleep} = require("./util/sleep");
+const { embeddedInvalidMessage, embeddedSuccessMessage } = require("./util/embedded-messages");
 const { prefix, token, confirm_test, reject_test, channelID } = require('./config.json');
 
 const client = new Discord.Client();
@@ -100,10 +101,12 @@ client.on('messageReactionAdd', (reaction, user) => {
     const isCorrectChannel = reaction.message.channel.id === channelID;
     console.log(reaction.message.channel.id);
 
-    if (!isCorrectChannel || !isCorrectEmoji) {
+    if (!isCorrectChannel || !isCorrectEmoji || reaction.count === 1) {
         return;
     }
-    console.log('Success');
+    handleTestResultReactions(reaction, user)
+        .then(result => console.log(result));
+
 })
 
 client.on('raw', packet => {
@@ -137,5 +140,58 @@ client.on('raw', packet => {
         }
     });
 })
+
+
+async function handleTestResultReactions(reaction, user) {
+    const message = reaction.message;
+    const testResult = message.embeds[0];
+
+    if (message.embeds.length < 0) {
+        return console.log('Somehow this is not an embedded Message :(');
+    }
+    if (testResult.fields.length < 0) {
+        return console.log('There an no Fields in this embedded Message (ID is therefore missing)')
+    }
+    const userID = testResult.fields[0].value;
+
+    //Check if Reaction Count changed (Reaction was taken back)
+    const before = reaction.count;
+    await sleep(5000);
+    const after = reaction.count;
+
+    //Reaction was taken back
+    if (after < before) {
+        user.send(embeddedSuccessMessage(`Successfully cancelled Confirmation!`))
+            .then(msg => {
+                if (msg.channel.type === 'dm') return;
+                console.log('Notified Test Result Confirmation Executor and did not send Confirmation to User');
+            })
+            .catch(error => {
+                console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
+            });
+        return 'Cancelled Confirmation/Rejection';
+    }
+    //Accept Test Result and notify user
+    if (reaction.emoji.name === confirm_test) {
+        //ToDo: Add List and List handling
+        client.users.fetch(userID)
+            .then(userTest => {
+                userTest.send(embeddedSuccessMessage('Your Test Result has been confirmed! :)'))
+                    .then(msg => {
+                        if (msg.channel.type === 'dm'){
+                            user.send(embeddedSuccessMessage(`${userTest.username} has been notified of the Confirmation`))
+                            return console.log('Notified User of Test Result Confirmation');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Could not send DM to ${message.author.tag}.\n`, error);
+                    });
+            })
+            .catch(() => console.error('Error while trying to get user'));
+        return 'Confirmed Test Result';
+    }
+}
+
+
 
 
