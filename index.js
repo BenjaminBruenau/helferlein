@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { embeddedInvalidMessage } = require("./commands/util/embedded-messages");
-const { prefix, token} = require('./config.json');
+const { embeddedInvalidMessage } = require("./util/embedded-messages");
+const { prefix, token } = require('./config.json');
 
 const client = new Discord.Client();
 

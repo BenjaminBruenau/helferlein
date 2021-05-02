@@ -13,3 +13,9 @@ exports.embeddedInvalidMessage = function (error, color= '#ff0000') {
         .setTitle(error);
 }
 
+exports.embeddedSuccessMessage = function (success) {
+    return new Discord.MessageEmbed()
+        .setColor('#53ae12')
+        .setTitle(success);
+}
+
