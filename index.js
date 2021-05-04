@@ -99,7 +99,7 @@ client.on('message', message => {
 client.on('messageReactionAdd', (reaction, user) => {
     const isCorrectEmoji = reaction.emoji.name === confirm_test || reaction.emoji.name === reject_test;
     const isCorrectChannel = reaction.message.channel.id === channelID;
-    console.log(reaction.message.channel.id);
+    //console.log(reaction.message.channel.id);
 
     if (!isCorrectChannel || !isCorrectEmoji || reaction.count === 1) {
         return;
@@ -156,12 +156,26 @@ async function handleTestResultReactions(reaction, user) {
 
     //Check if Reaction Count changed (Reaction was taken back)
     const before = reaction.count;
+    // Wait 5 seconds
+
+
+    // Remove reaction if there were already more than 2 reactions (bot + 1 User) to avoid problems e.g. send Confirmation twice
+    if ((before - 1) !== 1) {
+        reaction.users.remove(user)
+            .then(removedReaction => console.log(`Removed ${removedReaction.emoji} from ${user.username} since the number`
+             + ` of reactions was exceeding the limit`))
+            .catch(error => {
+                console.error('Could not remove reaction\n', error);
+            });
+        return 'Canceled Reacting';
+    }
+
     await sleep(5000);
     const after = reaction.count;
 
     //Reaction was taken back
     if (after < before) {
-        user.send(embeddedSuccessMessage(`Successfully cancelled Confirmation!`))
+        user.send(embeddedSuccessMessage(`Successfully canceled Confirmation!`))
             .then(msg => {
                 if (msg.channel.type === 'dm') return;
                 console.log('Notified Test Result Confirmation Executor and did not send Confirmation to User');
@@ -169,7 +183,7 @@ async function handleTestResultReactions(reaction, user) {
             .catch(error => {
                 console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
             });
-        return 'Cancelled Confirmation/Rejection';
+        return 'Canceled Confirmation/Rejection';
     }
     //Accept Test Result and notify user
     if (reaction.emoji.name === confirm_test) {
@@ -190,8 +204,47 @@ async function handleTestResultReactions(reaction, user) {
             .catch(() => console.error('Error while trying to get user'));
         return 'Confirmed Test Result';
     }
+
+    let embedTable = new Discord.MessageEmbed()
+        .setDescription(getTable())
+    await message.channel.send(embedTable)
+    return 'Huh, nothing happened';
 }
 
 
-
+function getTable() {
+    let s =
+   "+--------+--------------+\n" +
+   "| Hearts | Extra Damage |\n" +
+   "+--------+--------------+\n"+
+   "| 7      | 0,1          |\n"+
+   "+--------+--------------+\n"+
+   "| 6,5    | 0,15         |\n"+
+   "+--------+--------------+\n"+
+   "| 6      | 0,2          |\n"+
+   "+--------+--------------+\n"+
+   "| 5,5    | 0,25         |\n"+
+   "+--------+--------------+\n"+
+   "| 5      | 0,3          |\n"+
+   "+--------+--------------+\n"+
+   "| 4,5    | 0,35         |\n"+
+   "+--------+--------------+\n"+
+   "| 4      | 0,4          |\n"+
+   "+--------+--------------+\n"+
+   "| 3,5    | 0,45         |\n"+
+   "+--------+--------------+\n"+
+   "| 3      | 0,5          |\n"+
+   "+--------+--------------+\n"+
+   "| 2,5    | 0,55         |\n"+
+   "+--------+--------------+\n"+
+   "| 2      | 0,6          |\n"+
+   "+--------+--------------+\n"+
+   "| 1,5    | 0,6          |\n"+
+   "+--------+--------------+\n"+
+   "| 1      | 0,6          |\n"+
+   "+--------+--------------+\n"+
+   "| 0,5    | 0,8          |\n"+
+   "+--------+--------------+\n";
+    return s;
+}
 
