@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Discord = require('discord.js');
+const {addTestResult} = require("./test-result-list/test-result-list");
 const {sleep} = require("./util/sleep");
 const { embeddedInvalidMessage, embeddedSuccessMessage } = require("./util/embedded-messages");
 const { prefix, token, confirm_test, reject_test, channelID } = require('./config.json');
@@ -192,6 +193,7 @@ async function handleTestResultReactions(reaction, user) {
             .then(userTest => {
                 userTest.send(embeddedSuccessMessage('Your Test Result has been confirmed! :)'))
                     .then(msg => {
+                        addTestResult(userTest, message);
                         if (msg.channel.type === 'dm'){
                             user.send(embeddedSuccessMessage(`${userTest.username} has been notified of the Confirmation`))
                             return console.log('Notified User of Test Result Confirmation');
