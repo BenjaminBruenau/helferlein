@@ -1,7 +1,8 @@
-const { confirm_test, reject_test } = require('../config.json');
+const config = require('../config.json');
 const dateformat = require('dateformat');
 const resultJson = require('../test-result-list.json');
 const fs = require('fs');
+const Discord = require("discord.js");
 
 /*
 Save entry in Json, maybe sort the list?
@@ -34,7 +35,7 @@ exports.addTestResult = function (user, message) {
     let entry = {
         name: user.username,
         roomNr: roomNumber,
-        emoji: confirm_test,
+        emoji: config.confirm_test,
         expiration: dateformat(expirationDate, 'dd/mm/yy' )
     }
     const duplicate = results.filter(element => element.roomNr === entry.roomNr)
@@ -53,10 +54,59 @@ exports.addTestResult = function (user, message) {
     //console.log(resultsString);
     //ToDo: Move the file? If yes how
     fs.writeFile("test-result-list.json", resultsString, (error) => {
-        if (error) console.error('Error while saving to json File', error);
+        if (error) {
+            console.error('Error while saving to json File', error);
+            return console.log(resultsString);
+        }
     });
+    updateList(message.client).then(() => { console.log('Finished Adding Test Result') });
 }
 
+
+async function updateList(client) {
+    const listChannel = client.channels.cache.get(config.channelID_List);
+    let listMessage = listChannel.messages.cache.get(config.listMessage_ID);
+    //ToDo: Global Methods for fetching things and respective error messages
+    if (!listMessage) {
+        await deleteAllMessages(listChannel);
+        const initEmbed = new Discord.MessageEmbed().setDescription('Initiating List');
+        await listChannel.send(initEmbed).then(table => {
+            config.listMessage_ID = table.id;
+            listMessage = table;
+            // Save new ID to config
+            const configString = JSON.stringify(config, null, 4);
+            fs.writeFile('../config.json', configString, (error) => {
+                if (error) {
+                    console.error('Error while saving to json File', error);
+                    return console.log(configString);
+                }
+            });
+        }).catch(error => {
+            console.error('Error while sending new Test-Result List', error);
+        });
+    }
+    const embedTable = new Discord.MessageEmbed().setDescription('bye');
+    await listMessage.edit(embedTable);
+    //ToDo: Build List String (Ascii Art, maybe html/css)
+    console.log('Updated Test-Result List');
+}
+
+function deleteAllMessages(channel) {
+    // Can only delete last 100
+    channel.messages.fetch({limit:99})
+        .then(messages => {
+            channel.bulkDelete(messages)
+                .then(() => {
+                    console.log('Deleted all Messages in Channel');
+                })
+                .catch(error => {
+                    console.error('Error while trying to delete all Messages', error);
+                })
+        })
+        .catch(error => {
+            console.error('Error while fetching last 99 Messages', error);
+        });
+}
 
 function initResultArray() {
     results = resultJson.array;
