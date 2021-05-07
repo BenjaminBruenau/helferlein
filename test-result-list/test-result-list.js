@@ -38,9 +38,11 @@ exports.addTestResult = async function (user, message) {
         name: user.username,
         roomNr: roomNumber,
         emoji: config.confirm_test,
-        expiration: dateformat(expirationDate, 'dd/mm/yy')
+        expiration: dateformat(expirationDate, 'dd/mm/yy'),
+        id: user.id
     }
-    const duplicate = results.filter(element => element.roomNr === entry.roomNr)
+    // Todo: Maybe add id field and filter by id for more consistency?
+    const duplicate = results.filter(element => element.id === entry.id)
     // If there is already an entry from that person => replace it
     if (duplicate.length !== 0) {
         const pos = results.indexOf(duplicate[0]);
@@ -50,7 +52,29 @@ exports.addTestResult = async function (user, message) {
         results.push(entry);
     }
 
-    results.push(entry);
+    await updateJson();
+    updateList(message.client).then(() => {
+        console.log('Finished Adding Test Result')
+    });
+}
+
+exports.rejectTestResult = async function (user, message) {
+    await initResultArray();
+    const findEntry = results.filter(entry => entry.id === user.id);
+    if (findEntry.length === 0) {
+        return console.log('Could not find any List Entries for that user');
+    }
+    const pos = results.indexOf(findEntry[0]);
+    results[pos].emoji = config.reject_test;
+    results[pos].expiration = ' / '
+
+    await updateJson();
+    updateList(message.client).then(() => {
+        console.log('Finished Rejecting Test Result')
+    });
+}
+
+async function updateJson() {
     await updateResultList();
     const resultsString = JSON.stringify(resultList, null, 4);
     //console.log(resultsString);
@@ -61,11 +85,7 @@ exports.addTestResult = async function (user, message) {
             return console.log(resultsString);
         }
     });
-    updateList(message.client).then(() => {
-        console.log('Finished Adding Test Result')
-    });
 }
-
 
 async function updateList(client) {
     const listChannel = client.channels.cache.get(config.channelID_List);
@@ -112,6 +132,7 @@ async function buildList(listMessage) {
     });
     const embedTable = new Discord.MessageEmbed()
         .setTitle('__**Test Results**__')
+        .setColor('#F1C40F')
         .setDescription(list)
         .setFooter('|' + '\u3000'.repeat(20) +  '|');
     await listMessage.edit(embedTable)
