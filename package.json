@@ -13,7 +13,8 @@
   "author": "Benjamin Brünau",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.5.3"
+    "discord.js": "^12.5.3",
+    "node-html-to-image": "^3.1.0"
   },
   "devDependencies": {
     "dateformat": "^4.5.1"

@@ -6,6 +6,20 @@
             "emoji": "✅",
             "expiration": "12/05/21",
             "id": "732649997992198194"
+        },
+        {
+            "name": "George R.R. Martin",
+            "roomNr": "W199",
+            "emoji": "❌",
+            "expiration": "　/ ",
+            "id": "732649997992198193"
+        },
+        {
+            "name": "Test",
+            "roomNr": "W000",
+            "emoji": "❌",
+            "expiration": "　/ ",
+            "id": "732649997992198195"
         }
     ]
 }

@@ -4,6 +4,7 @@ const { addTestResult, rejectTestResult } = require("./test-result-list/test-res
 const { sleep } = require("./util/sleep");
 const { embeddedInvalidMessage, embeddedSuccessMessage } = require("./util/embedded-messages");
 const { prefix, token, confirm_test, reject_test, channelID } = require('./config.json');
+const nodeHtmlToImage =  require('node-html-to-image')
 
 const client = new Discord.Client();
 
@@ -30,7 +31,7 @@ client.login(token).then(value => console.log('Successfully Logged in!'));
 client.on('message', message => {
     //ToDo: This is pretty messy
     if (!message.content.startsWith(prefix) || message.author.bot) return;
-
+    //test(message);
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
     /*
@@ -112,6 +113,10 @@ client.on('messageReactionAdd', (reaction, user) => {
 
 client.on('raw', packet => {
     if (!['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'].includes(packet.t)) return;
+    const emoji = packet.d.emoji.name;
+    // Not an important Reaction
+    //if ( (emoji !== reject_test) || (emoji !== confirm_test) ) return;
+    if (channelID !== packet.d.channel_id) return;
 
     const channel = client.channels.cache.get(channelID);
 

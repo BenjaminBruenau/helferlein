@@ -66,7 +66,7 @@ exports.rejectTestResult = async function (user, message) {
     }
     const pos = results.indexOf(findEntry[0]);
     results[pos].emoji = config.reject_test;
-    results[pos].expiration = ' / '
+    results[pos].expiration = '\u3000/ '
 
     await updateJson();
     updateList(message.client).then(() => {
@@ -127,8 +127,13 @@ async function buildList(listMessage) {
     const split = '+---------------+------+-----+-----------+\n';
 
     results.forEach(entry => {
-        list += split + `${entry.name}`.padEnd(14 - entry.name.length,'\u3000') + `${entry.roomNr} `
-            + `\u3000${entry.emoji}\u3000${entry.expiration}\n`;
+        let name = entry.name;
+        if ((14 - entry.name.length) <= 0) {
+            const nameParts = entry.name.split(' ');
+            name = nameParts[0];
+        }
+        list += split + `${name}`.padEnd(23 - name.length,'\u2004') + `${entry.roomNr} `
+            + `\u2004${entry.emoji}\u2004${entry.expiration}\n`;
     });
     const embedTable = new Discord.MessageEmbed()
         .setTitle('__**Test Results**__')
@@ -142,6 +147,10 @@ async function buildList(listMessage) {
         .catch(error => {
             console.error('Error while editing List', error);
         });
+
+}
+
+function getPadNumber(entry) {
 
 }
 
@@ -169,3 +178,5 @@ function initResultArray() {
 function updateResultList() {
     resultList.array = results;
 }
+
+
