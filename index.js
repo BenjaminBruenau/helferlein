@@ -226,5 +226,159 @@ async function handleTestResultReactions(reaction, user) {
     return 'Huh, nothing happened';
 }
 
+async function test(message) {
 
+    let name = 'test';
+    const  _htmlTemplate =
+        `<style>
+
+body {
+    font-family: "Poppins", Arial, Helvetica, sans-serif;
+    background: rgb(22, 22, 22);
+    color: #fff;
+    max-width: 400px;
+    max-height: 400px;
+}
+.app {
+    max-width: 300px;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    border-top: 3px solid rgb(16, 180, 209);
+    background: rgb(31, 31, 31);
+    align-items: center;
+}
+table.steelBlueCols {
+  border: 4px solid #555555;
+  background-color: #555555;
+  width: 400px;
+  text-align: center;
+  border-collapse: collapse;
+}
+table.steelBlueCols td, table.steelBlueCols th {
+  border: 1px solid #555555;
+  padding: 5px 10px;
+}
+table.steelBlueCols tbody td {
+  font-size: 12px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+table.steelBlueCols td:nth-child(even) {
+  background: #398AA4;
+}
+table.steelBlueCols thead {
+  background: #398AA4;
+  border-bottom: 10px solid #398AA4;
+}
+table.steelBlueCols thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-align: left;
+  border-left: 2px solid #398AA4;
+}
+table.steelBlueCols thead th:first-child {
+  border-left: none;
+}
+
+table.steelBlueCols tfoot td {
+  font-size: 13px;
+}
+table.steelBlueCols tfoot .links {
+  text-align: right;
+}
+table.steelBlueCols tfoot .links a{
+  display: inline-block;
+  background: #FFFFFF;
+  color: #398AA4;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+</style>
+<table class="steelBlueCols">
+<thead>
+<tr>
+<th>head1</th>
+<th>head2</th>
+<th>head3</th>
+<th>head4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cell1_1</td>
+<td>cell2_1</td>
+<td>cell3_1</td>
+<td>cell4_1</td>
+</tr>
+<tr>
+<td>cell1_2</td>
+<td>cell2_2</td>
+<td>cell3_2</td>
+<td>cell4_2</td>
+</tr>
+<tr>
+<td>cell1_3</td>
+<td>cell2_3</td>
+<td>cell3_3</td>
+<td>cell4_3</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+<tr>
+<td>cell1_4</td>
+<td>cell2_4</td>
+<td>cell3_4</td>
+<td>cell4_4</td>
+</tr>
+</tbody>
+</table>`
+
+
+    const images = await nodeHtmlToImage({
+        html: _htmlTemplate,
+        quality: 400,
+        type: 'png',
+        puppeteerArgs: {
+            args: ['--no-sandbox'],
+        },
+        encoding: 'buffer',
+    })
+    return message.channel.send(new Discord.MessageAttachment(images, `${name}.png`))
+}
 
