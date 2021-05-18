@@ -177,15 +177,28 @@ async function deleteAllMessages(channel) {
 function verifyDates() {
     const today = new Date();
     results.forEach(entry => {
-        let expirationDate = new Date(entry.expiration);
-        if (expirationDate >= today) {
+
+        let expirationDate = parseDate(entry.expiration);
+        if (expirationDate <= today) {
             entry.emoji = "🚫";
+            console.log(`${entry.name}'s Test Result has expired!`);
         }
     });
 }
 
+function parseDate(dateString) {
+    const dateParts = dateString.split('/');
+    const year = parseInt(`20${dateParts[2]}`);
+    const month = parseInt(dateParts[1]);
+    const day = parseInt(dateParts[0]);
+    console.log(`Parsed Date: ${day}-${month}-${year}`);
+
+    return new Date(year, month - 1, day);
+}
+
 function sortResultArray() {
-    results.sort((a, b) => new Date(b.expiration) - new Date(a.expiration));
+    results.sort((a, b) => parseDate(b.expiration) - parseDate(a.expiration));
+    console.log('Sorted Test Result List!');
 }
 
 function initResultArray() {
