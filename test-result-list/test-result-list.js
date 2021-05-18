@@ -25,6 +25,11 @@ exports.addTestResult = async function (user, message) {
     let roomNumber = '';
     await message.guild.members.fetch(user.id)
         .then(member => {
+            console.log(`Fetched Guild Member ${member.displayName}`);
+            //ToDO: Fix Error (Could not fetch guild member! TypeError: Cannot read property 'name' of undefined
+            // 0|index  | 2021-05-12T18:13:15:     at /root/helferlein/test-result-list/test-result-list.js:29:31
+            // 0|index  | 2021-05-12T18:13:15:     at processTicksAndRejections (internal/process/task_queues.js:93:5)
+            // 0|index  | 2021-05-12T18:13:15:     at async exports.addTestResult (/root/helferlein/test-result-list/test-result-list.js:26:5))
             let role = member.roles.cache.find(role => role.name.startsWith('W'));
             roomNumber = role.name;
             console.log(`${roomNumber}`);
@@ -75,6 +80,8 @@ exports.rejectTestResult = async function (user, message) {
 }
 
 async function updateJson() {
+    await verifyDates();
+    await sortResultArray();
     await updateResultList();
     const resultsString = JSON.stringify(resultList, null, 4);
     //console.log(resultsString);
@@ -150,10 +157,6 @@ async function buildList(listMessage) {
 
 }
 
-function getPadNumber(entry) {
-
-}
-
 async function deleteAllMessages(channel) {
     // Can only delete last 100
     await channel.messages.fetch({limit:99})
@@ -169,6 +172,20 @@ async function deleteAllMessages(channel) {
         .catch(error => {
             console.error('Error while fetching last 99 Messages', error);
         });
+}
+
+function verifyDates() {
+    const today = new Date();
+    results.forEach(entry => {
+        let expirationDate = new Date(entry.expiration);
+        if (expirationDate >= today) {
+            entry.emoji = "🚫";
+        }
+    });
+}
+
+function sortResultArray() {
+    results.sort((a, b) => new Date(b.expiration) - new Date(a.expiration));
 }
 
 function initResultArray() {

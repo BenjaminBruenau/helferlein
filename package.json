@@ -17,7 +17,8 @@
     "node-html-to-image": "^3.1.0"
   },
   "devDependencies": {
-    "dateformat": "^4.5.1"
+    "dateformat": "^4.5.1",
+    "prettier": "^2.3.0"
   },
   "keywords": []
 }
