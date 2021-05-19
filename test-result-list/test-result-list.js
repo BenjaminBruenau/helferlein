@@ -79,6 +79,26 @@ exports.rejectTestResult = async function (user, message) {
     });
 }
 
+exports.updateTestResult = async function (username, newDate, message) {
+    await initResultArray();
+    const findEntry = results.filter(entry => entry.name === username);
+    if (findEntry.length === 0) {
+        return 'The specified user does not exist';
+    }
+    const pos = results.indexOf(findEntry[0]);
+
+    const newExpirationDate = parseDate(newDate);
+    newExpirationDate.setDate(newExpirationDate.getDate() + 4);
+
+    results[pos].expiration = dateformat(newExpirationDate, 'dd/mm/yy');
+
+    await updateJson();
+    updateList(message.client).then(() => {
+        console.log('Finished Updating Test Result');
+    })
+    return 'Successfully updated Test Result';
+}
+
 async function updateJson() {
     await verifyDates();
     await sortResultArray();
@@ -180,8 +200,11 @@ function verifyDates() {
 
         let expirationDate = parseDate(entry.expiration);
         if (expirationDate <= today) {
-            entry.emoji = "🚫";
+            entry.emoji = '🚫';
             console.log(`${entry.name}'s Test Result has expired!`);
+        }
+        if (entry.emoji === '🚫' && expirationDate > today) {
+            entry.emoji = config.confirm_test;
         }
     });
 }
@@ -191,7 +214,8 @@ function parseDate(dateString) {
     const year = parseInt(`20${dateParts[2]}`);
     const month = parseInt(dateParts[1]);
     const day = parseInt(dateParts[0]);
-    console.log(`Parsed Date: ${day}-${month}-${year}`);
+    //ToDo: This produces a lot of Logs, maybe change this to log.debug or smth similar?
+    //console.log(`Parsed Date: ${day}-${month}-${year}`);
 
     return new Date(year, month - 1, day);
 }
