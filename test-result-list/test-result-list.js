@@ -4,21 +4,16 @@ const resultJson = require('../test-result-list.json');
 const fs = require('fs');
 const Discord = require("discord.js");
 
-/*
-Save entry in Json, maybe sort the list?
-Use a class to keep track of entries and the initialize an array with json objects?
- */
-
 // Keep track of Results
 let results = [];
-// Save Results persistently with this
+// Save Results persistently with this (MongoDB auf Wish bestellt)
 let resultList = {
     array: results
 };
 
 exports.addTestResult = async function (user, message) {
     //ToDo: Maybe find a way to only call this after a restart
-    await initResultArray();
+    initResultArray();
     const start = new Date();
     const expirationDate = new Date();
     expirationDate.setDate(start.getDate() + 4);
@@ -27,17 +22,17 @@ exports.addTestResult = async function (user, message) {
         .then(member => {
             console.log(`Fetched Guild Member ${member.displayName}`);
             //ToDO: Fix Error (Could not fetch guild member! TypeError: Cannot read property 'name' of undefined
+            // role isn't found even though it is there
             // 0|index  | 2021-05-12T18:13:15:     at /root/helferlein/test-result-list/test-result-list.js:29:31
             // 0|index  | 2021-05-12T18:13:15:     at processTicksAndRejections (internal/process/task_queues.js:93:5)
             // 0|index  | 2021-05-12T18:13:15:     at async exports.addTestResult (/root/helferlein/test-result-list/test-result-list.js:26:5))
-            let role = member.roles.cache.find(role => role.name.startsWith('W'));
+            let role = member.roles.cache.find(memberRole => memberRole.name.startsWith('W'));
             roomNumber = role.name;
             console.log(`${roomNumber}`);
         })
         .catch(error => {
             console.error('Could not fetch guild member!', error);
         });
-    //ToDo: Add room number? If yes how to get it? As an argument via !register-test? Via Room Roles on the Discord?
     // ToDo: What if someone on the discord uses !register-test without having a room role
     let entry = {
         name: user.username,
@@ -46,8 +41,8 @@ exports.addTestResult = async function (user, message) {
         expiration: dateformat(expirationDate, 'dd/mm/yy'),
         id: user.id
     }
-    // Todo: Maybe add id field and filter by id for more consistency?
     const duplicate = results.filter(element => element.id === entry.id)
+
     // If there is already an entry from that person => replace it
     if (duplicate.length !== 0) {
         const pos = results.indexOf(duplicate[0]);
@@ -64,7 +59,7 @@ exports.addTestResult = async function (user, message) {
 }
 
 exports.rejectTestResult = async function (user, message) {
-    await initResultArray();
+    initResultArray();
     const findEntry = results.filter(entry => entry.id === user.id);
     if (findEntry.length === 0) {
         return console.log('Could not find any List Entries for that user');
@@ -80,7 +75,7 @@ exports.rejectTestResult = async function (user, message) {
 }
 
 exports.updateTestResult = async function (username, newDate, message) {
-    await initResultArray();
+    initResultArray();
     const findEntry = results.filter(entry => entry.name === username);
     if (findEntry.length === 0) {
         return 'The specified user does not exist';
@@ -99,10 +94,15 @@ exports.updateTestResult = async function (username, newDate, message) {
     return 'Successfully updated Test Result';
 }
 
+
+/**
+ * Has to be called after changing the result list in any way.
+ * Will also verify the expiration Dates and sort the list accordingly.
+ */
 async function updateJson() {
-    await verifyDates();
-    await sortResultArray();
-    await updateResultList();
+    verifyDates();
+    sortResultArray();
+    updateResultList();
     const resultsString = JSON.stringify(resultList, null, 4);
     //console.log(resultsString);
     //ToDo: Move the file? If yes how
@@ -114,6 +114,9 @@ async function updateJson() {
     });
 }
 
+/**
+ *  Will update the Result List in the specific Channel.
+ */
 async function updateList(client) {
     const listChannel = client.channels.cache.get(config.channelID_List);
     let listMessage = listChannel.messages.cache.get(config.listMessage_ID);
@@ -149,7 +152,11 @@ async function updateList(client) {
     console.log('Updated Test-Result List');
 }
 
+/**
+ * Builds List according to the result array/the underlying JSON Structure
+ */
 async function buildList(listMessage) {
+    //ToDo: replace ascii art with HTML and CSS
     let list = '**Name**'.padEnd(12, '\u3000') + '**Room**'.padEnd(5, '\u3000') + '\u3000\u3000\u3000**Expiring**\n';
     const split = '+---------------+------+-----+-----------+\n';
 
@@ -179,7 +186,7 @@ async function buildList(listMessage) {
 
 async function deleteAllMessages(channel) {
     // Can only delete last 100
-    await channel.messages.fetch({limit:99})
+    await channel.messages.fetch({limit: 99})
         .then(messages => {
             channel.bulkDelete(messages)
                 .then(() => {
@@ -232,5 +239,3 @@ function initResultArray() {
 function updateResultList() {
     resultList.array = results;
 }
-
-

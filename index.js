@@ -26,7 +26,7 @@ client.once('ready', () => {
     console.log('Ready!');
 });
 
-client.login(token).then(value => console.log('Successfully Logged in!'));
+client.login(token).then(() => console.log('Successfully Logged in!'));
 
 client.on('message', message => {
     //ToDo: This is pretty messy
@@ -34,14 +34,12 @@ client.on('message', message => {
     //test(message);
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
-    /*
-    if (message.content === `${prefix}server`) {
-        message.channel.send(`This server's name is: ${message.guild.name} \nMembers: ${message.guild.memberCount}`);
-     */
+
     if (!client.commands.has(commandName)) return;
 
     //Get command and check for possible aliases
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
     if (command.disabled) {
         return console.log(`${prefix}${commandName} is disabled!`);
     }

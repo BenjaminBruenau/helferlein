@@ -22,7 +22,7 @@ module.exports = {
 
         function embeddedHelp() {
             const argument = '<command name>';
-            const embeddedHelp = new Discord.MessageEmbed()
+            const embeddedHelpMessage = new Discord.MessageEmbed()
                 .setColor('#F1C40F')
                 .setTitle('**Help from Helferlein**')
                 .setDescription(`You can see all of my commands here. \nTo see information of a specific command please use: \n \`${prefix}help ${argument}\``)
@@ -33,7 +33,7 @@ module.exports = {
                 )
                 .setTimestamp()
                 .setFooter('Helferlein', iconUrl);
-            message.channel.send(embeddedHelp);
+            message.channel.send(embeddedHelpMessage);
         }
 
         function embeddedCommandHelp() {

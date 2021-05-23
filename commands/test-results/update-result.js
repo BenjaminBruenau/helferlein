@@ -1,7 +1,5 @@
-const Discord = require("discord.js");
 const {updateTestResult} = require("../../test-result-list/test-result-list");
 const { embeddedInvalidMessage, embeddedSuccessMessage } = require("../../util/embedded-messages");
-const { channelID, confirm_test, reject_test } = require('../../config.json');
 
 module.exports = {
     name: 'update-result',
