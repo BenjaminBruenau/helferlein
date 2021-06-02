@@ -1,4 +1,4 @@
-const {updateTestResult} = require("../../test-result-list/test-result-list");
+const { updateTestResultDate } = require("../../test-result-list/test-result-list");
 const { embeddedInvalidMessage, embeddedSuccessMessage } = require("../../util/embedded-messages");
 
 module.exports = {
@@ -23,7 +23,7 @@ module.exports = {
             e.g. 19/05/21`));
         }
 
-        const returnMessage = await updateTestResult(username, newDate, message);
+        const returnMessage = await updateTestResultDate(username, newDate, message);
         if (returnMessage.startsWith('T')) {
             console.log('User to update Test Result of not found');
             return message.channel.send(embeddedInvalidMessage(returnMessage));

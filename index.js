@@ -165,6 +165,7 @@ async function handleTestResultReactions(reaction, user) {
 
     // Remove reaction if there were already more than 2 reactions (bot + 1 User) to avoid problems e.g. send Confirmation twice
     if ((before - 1) !== 1) {
+        //ToDo: Don't allow a Confirmation/Rejection if the pendant was already issued
         reaction.users.remove(user)
             .then(removedReaction => console.log(`Removed ${removedReaction.emoji} from ${user.username} since the number`
              + ` of reactions was exceeding the limit`))

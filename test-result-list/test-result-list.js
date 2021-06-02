@@ -74,26 +74,55 @@ exports.rejectTestResult = async function (user, message) {
     });
 }
 
-exports.updateTestResult = async function (username, newDate, message) {
+exports.updateTestResultDate = async function (username, newDate, message) {
     initResultArray();
-    const findEntry = results.filter(entry => entry.name === username);
-    if (findEntry.length === 0) {
+    const entry = getEntry(username);
+    if (!entry) {
         return 'The specified user does not exist';
     }
-    const pos = results.indexOf(findEntry[0]);
+    const pos = getPositionOfEntry(entry);
 
     const newExpirationDate = parseDate(newDate);
     newExpirationDate.setDate(newExpirationDate.getDate() + 4);
 
     results[pos].expiration = dateformat(newExpirationDate, 'dd/mm/yy');
 
-    await updateJson();
-    updateList(message.client).then(() => {
-        console.log('Finished Updating Test Result');
-    })
-    return 'Successfully updated Test Result';
+    await updateTestResults(message, 'Finished Updating Test Result Date');
+    return 'Successfully updated Test Result Date';
 }
 
+exports.updateTestResultRoom = async function (username, roomNumber, message) {
+    initResultArray();
+    const entry = getEntry(username);
+    if (!entry) {
+        return 'The specified user does not exist';
+    }
+    const pos = getPositionOfEntry(entry);
+
+    results[pos].roomNr = roomNumber;
+    await updateTestResults(message, 'Finished Updating Test Result Room');
+    return 'Successfully updated Test Result Room';
+}
+
+async function updateTestResults(message, logMessage) {
+    await updateJson();
+    updateList(message.client).then(() => {
+        console.log(logMessage);
+    })
+}
+
+function getEntry(username) {
+    const findEntry = results.filter(entry => entry.name === username);
+    if (findEntry.length === 0) {
+        console.log('The specified user does not exist');
+        return undefined;
+    }
+    return findEntry[0];
+}
+
+function getPositionOfEntry(entry) {
+    return results.indexOf(entry);
+}
 
 /**
  * Has to be called after changing the result list in any way.
