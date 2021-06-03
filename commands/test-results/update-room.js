@@ -28,8 +28,8 @@ module.exports = {
             console.log('User to update Test Result of not found');
             return message.channel.send(embeddedInvalidMessage(returnMessage));
         } else {
-            console.log(`Updated Test Result of ${username}:`);
-            console.log(`Date was changed to ${newRoom}`);
+            console.log(`Updated Test Result Room of ${username}:`);
+            console.log(`Room was changed to ${newRoom}`);
             return message.channel.send(embeddedSuccessMessage(returnMessage));
         }
 

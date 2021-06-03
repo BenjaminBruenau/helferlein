@@ -28,7 +28,7 @@ module.exports = {
             console.log('User to update Test Result of not found');
             return message.channel.send(embeddedInvalidMessage(returnMessage));
         } else {
-            console.log(`Updated Test Result of ${username}:`);
+            console.log(`Updated Test Result Date of ${username}:`);
             console.log(`Date was changed to ${newDate}`);
             return message.channel.send(embeddedSuccessMessage(returnMessage));
         }

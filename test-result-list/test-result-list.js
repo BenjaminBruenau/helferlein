@@ -1,8 +1,9 @@
+const Discord = require("discord.js");
+const fs = require('fs');
 const config = require('../config.json');
 const dateformat = require('dateformat');
 const resultJson = require('../test-result-list.json');
-const fs = require('fs');
-const Discord = require("discord.js");
+const { deleteAllMessages } = require("../util/delete-messages");
 
 // Keep track of Results
 let results = [];
@@ -12,7 +13,6 @@ let resultList = {
 };
 
 exports.addTestResult = async function (user, message) {
-    //ToDo: Maybe find a way to only call this after a restart
     initResultArray();
     const start = new Date();
     const expirationDate = new Date();
@@ -52,10 +52,7 @@ exports.addTestResult = async function (user, message) {
         results.push(entry);
     }
 
-    await updateJson();
-    updateList(message.client).then(() => {
-        console.log('Finished Adding Test Result')
-    });
+    await updateTestResults(message, 'Finished Adding Test Result');
 }
 
 exports.rejectTestResult = async function (user, message) {
@@ -68,10 +65,7 @@ exports.rejectTestResult = async function (user, message) {
     results[pos].emoji = config.reject_test;
     results[pos].expiration = '\u3000/ '
 
-    await updateJson();
-    updateList(message.client).then(() => {
-        console.log('Finished Rejecting Test Result')
-    });
+    await updateTestResults(message, 'Finished Rejecting Test Result');
 }
 
 exports.updateTestResultDate = async function (username, newDate, message) {
@@ -104,6 +98,14 @@ exports.updateTestResultRoom = async function (username, roomNumber, message) {
     return 'Successfully updated Test Result Room';
 }
 
+/**
+ * Takes care of calling {@link updateJson} to go through every necessary update Step
+ * of the underlying data structure
+ * and updates the List displayed in the respective Discord Channel (via {@link updateList})
+ * @param message To get the client
+ * @param logMessage Message to be logged in the console when succeeding
+ *
+ */
 async function updateTestResults(message, logMessage) {
     await updateJson();
     updateList(message.client).then(() => {
@@ -213,23 +215,6 @@ async function buildList(listMessage) {
 
 }
 
-async function deleteAllMessages(channel) {
-    // Can only delete last 100
-    await channel.messages.fetch({limit: 99})
-        .then(messages => {
-            channel.bulkDelete(messages)
-                .then(() => {
-                    console.log('Deleted all Messages in Channel');
-                })
-                .catch(error => {
-                    console.error('Error while trying to delete all Messages', error);
-                })
-        })
-        .catch(error => {
-            console.error('Error while fetching last 99 Messages', error);
-        });
-}
-
 function verifyDates() {
     const today = new Date();
     results.forEach(entry => {
@@ -253,6 +238,7 @@ function parseDate(dateString) {
     //ToDo: This produces a lot of Logs, maybe change this to log.debug or smth similar?
     //console.log(`Parsed Date: ${day}-${month}-${year}`);
 
+    // Starts counting the month at 0
     return new Date(year, month - 1, day);
 }
 
