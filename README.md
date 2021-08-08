@@ -27,7 +27,7 @@ The Test Results would then be redirected to the "Floor Speakers" for confirmati
 ### Validating a Test
 
 (By reacting to the message -> when accepted the person was notified)
-![](https://i.imgur.com/EQ6Vimz.png)
+![](https://i.imgur.com/zXwPCGO.png)
 
 
 ### Test Result List Example
