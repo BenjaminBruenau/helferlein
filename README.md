@@ -1,6 +1,6 @@
 # Helferlein - A Discord Bot for my Dorm :)
 
-Made with Javascript and [DiscordJS](https://discord.js.org/#/) 
+Made with JavaScript and [DiscordJS](https://discord.js.org/#/) 
 
 ![](https://i.imgur.com/h1hUnKw.jpeg)
 
